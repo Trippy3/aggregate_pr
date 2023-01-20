@@ -1,0 +1,3 @@
+pytest
+typing_extensions
+black==22.12.0

@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field, InitVar
 from urllib.parse import urlparse
 
+
 @dataclass(frozen=True)
 class Repository:
     addr: InitVar[str]

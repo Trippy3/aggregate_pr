@@ -1,7 +1,7 @@
 import sys
 from typing import Any
 from datetime import datetime
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 
 import requests
 import polars as pl
@@ -25,7 +25,7 @@ class PullReqData:
     changed_files: list[int] = field(default_factory=list)
 
     def to_lazyframe(self) -> pl.LazyFrame:
-        pass
+        return pl.DataFrame(asdict(self)).lazy()
 
 
 def _request(addr: str) -> requests.Response:
@@ -35,19 +35,26 @@ def _request(addr: str) -> requests.Response:
     if res.status_code != requests.codes.ok:
         print(f"Error: GET Status: {res.status_code}, Address: {addr}", file=sys.stderr)
         sys.exit(1)
+    return res
 
 
 def _make_data_sources(owner: str, repo: str, start: datetime, end: datetime, json: Any) -> PullReqData:
     prd = PullReqData()
+    print(prd)
+    print(asdict(prd))
     for pull_request in json:
         if (pr := AttrDict(pull_request)) == False:
+            # TODO: print warning
             return prd
+        if pr.merged_at is None:  # PRs closed without merging are not needed for aggregation
+            continue
         if (
             datetime.strptime(pr.created_at, "%Y-%m-%dT%H:%M:%SZ") < start
             or datetime.strptime(pr.merged_at, "%Y-%m-%dT%H:%M:%SZ") > end
         ):
             continue
         pr_detail = AttrDict(_request(f"https://api.github.com/repos/{owner}/{repo}/pulls/{pr.number}").json())
+        # prd.number.append(pr.number)
     return prd
 
 

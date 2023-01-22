@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 @dataclass(frozen=True)
 class Repository:
     addr: InitVar[str]
+    # TODO: add token
     owner: str = field(init=False)
     name: str = field(init=False)
 

@@ -49,16 +49,18 @@ def _make_data_sources(owner: str, repo: str, start: datetime, end: datetime, js
         if pr.merged_at is None:  # PRs closed without merging are not needed for aggregation
             continue
         if (
-            datetime.strptime(pr.created_at, "%Y-%m-%dT%H:%M:%SZ") < start
-            or datetime.strptime(pr.merged_at, "%Y-%m-%dT%H:%M:%SZ") > end
+            datetime.strptime(pr.created_at, "%Y-%m-%dT%H:%M:%S%z") < start
+            or datetime.strptime(pr.merged_at, "%Y-%m-%dT%H:%M:%S%z") > end
         ):
             continue
         pr_detail = AttrDict(_request(f"https://api.github.com/repos/{owner}/{repo}/pulls/{pr.number}").json())
         # prd.number.append(pr.number)
+        print(pr.number, pr.merged_at)
     return prd
 
 
 def get_pullreq_data(owner: str, repo: str, start: datetime, end: datetime) -> pl.LazyFrame:
+    # TODO: change function args; pass dataclass
     res = _request(f"https://api.github.com/repos/{owner}/{repo}/pulls?state=closed&per_page=50")
     data_src = _make_data_sources(owner, repo, start, end, res.json())
     return data_src.to_lazyframe()

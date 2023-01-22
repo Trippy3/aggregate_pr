@@ -12,7 +12,8 @@ class DateRange:
     def __post_init__(self, start_arg, end_arg):
         # TODO: add Secured Validation
         start = self._get_monday() if start_arg is None else self._jst_to_utc(start_arg)
-        end = datetime.now(timezone.utc) if end_arg is None else self._jst_to_utc(end_arg)
+        # To match json time format and compare with native timezone instead of aware
+        end = datetime.now(timezone.utc).replace(tzinfo=None) if end_arg is None else self._jst_to_utc(end_arg)
         object.__setattr__(self, "start", start)
         object.__setattr__(self, "end", end)
 

@@ -12,5 +12,5 @@ class Repository:
     def __post_init__(self, addr):
         # TODO: add Secured Validation
         url_path = urlparse(addr).path
-        object.__setattr__(self, "owner", url_path.split("/")[0])
-        object.__setattr__(self, "name", url_path.split("/")[1])
+        object.__setattr__(self, "owner", url_path.split("/")[1])  # path is "/owner/repo"
+        object.__setattr__(self, "name", url_path.split("/")[2])

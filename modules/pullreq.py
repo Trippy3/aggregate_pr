@@ -17,7 +17,7 @@ class PullReqData:
     number: list[int] = field(default_factory=list)
     title: list[str] = field(default_factory=list)
     user: list[str] = field(default_factory=list)
-    labels: list[list[str]] = field(default_factory=list)
+    labels: list[str | None] = field(default_factory=list)
     milestone: list[str | None] = field(default_factory=list)
     created_at: list[datetime] = field(default_factory=list)
     merged_at: list[datetime] = field(default_factory=list)
@@ -59,7 +59,7 @@ def _make_data_sources(repo: Repository, date_range: DateRange, json: Any) -> Pu
         prd.number.append(pr.number)
         prd.title.append(pr.title)
         prd.user.append(pr.user.login)
-        prd.labels.append([lable["name"] for lable in pr.labels])
+        prd.labels.append(",".join([lable["name"] for lable in pr.labels]) if pr.labels else None)
         prd.milestone.append(pr.milestone.title if pr.milestone is not None else None)
         prd.created_at.append(created_at)
         prd.merged_at.append(merged_at)
@@ -72,7 +72,6 @@ def _make_data_sources(repo: Repository, date_range: DateRange, json: Any) -> Pu
 
 
 def get_pullreq_data(repo: Repository, date_range: DateRange) -> pl.LazyFrame:
-    res = _request(f"https://api.github.com/repos/{repo.owner}/{repo.name}/pulls?state=closed&per_page=50")
+    res = _request(f"https://api.github.com/repos/{repo.owner}/{repo.name}/pulls?state=closed&per_page=10") # TODO: 50
     data_src = _make_data_sources(repo, date_range, res.json())
-    print(data_src)
     return data_src.to_lazyframe()

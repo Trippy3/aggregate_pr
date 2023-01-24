@@ -24,4 +24,4 @@ class Repository:
             print(f"Warning: Token file does not exist. path: {token_file}")
             return
         with open(token_file, "r") as f:
-            object.__setattr__(self, "token", f.readline())
+            object.__setattr__(self, "token", f.readline().rstrip())  # Exclude trailing \n

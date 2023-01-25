@@ -1,3 +1,10 @@
 
+[tool.ruff]
+line-length = 125
+extend-select = ["Q"]
+flake8-quotes = {inline-quotes = "double", multiline-quotes = "double"}
+target-version = "py310"
+
 [tool.black]
 line-length = 125
+target-version = ["py310"]

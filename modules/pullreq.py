@@ -32,7 +32,7 @@ class PullReqData:
 
 
 def _request(addr: str) -> requests.Response:
-    token = "xxx"  # TODO: add args.
+    # token = "xxx"  # TODO: add args.
     # headers = {"Authorization": f"token {token}", "User-Agent": "githubapi", "Accept": "application/vnd.github+json"}
     # res = requests.get(addr, headers=headers)
     res = requests.get(addr)
@@ -45,8 +45,8 @@ def _request(addr: str) -> requests.Response:
 def _make_data_sources(repo: Repository, date_range: DateRange, json: Any) -> PullReqData:
     prd = PullReqData()
     for pull_request in json:
-        if (pr := AttrDict(pull_request)) == False:
-            print(f"Warning: The retrieved json content was empty.")
+        if (pr := AttrDict(pull_request)) is False:
+            print("Warning: The retrieved json content was empty.")
             return prd
         if pr.merged_at is None:  # PRs closed without merging are not needed for aggregation
             continue

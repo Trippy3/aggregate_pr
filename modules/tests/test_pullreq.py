@@ -1,6 +1,6 @@
-from datetime import datetime, timezone, timedelta
+# from datetime import datetime, timezone, timedelta
 
-import pytest
+# import pytest
 
 from .. import pullreq as pr
 from ..repository import Repository

@@ -1,5 +1,3 @@
-import pytest
-
 from ..date_range import DateRange
 
 

@@ -31,11 +31,11 @@ class PullReqData:
         return pl.DataFrame(asdict(self)).lazy()
 
 
-def _request(addr: str) -> requests.Response:
-    # token = "xxx"  # TODO: add args.
-    # headers = {"Authorization": f"token {token}", "User-Agent": "githubapi", "Accept": "application/vnd.github+json"}
-    # res = requests.get(addr, headers=headers)
-    res = requests.get(addr)
+def _request(addr: str, token: str | None) -> requests.Response:
+    headers = {"User-Agent": "githubapi", "Accept": "application/vnd.github+json"}
+    if token:
+        headers["Authorization"] = f"token {token}"
+    res = requests.get(addr, headers=headers)
     if res.status_code != requests.codes.ok:
         print(f"Error: GET Status: {res.status_code}, Address: {addr}", file=sys.stderr)
         sys.exit(1)
@@ -55,7 +55,9 @@ def _make_data_sources(repo: Repository, date_range: DateRange, json: Any) -> Pu
         ) > date_range.end:
             continue
         # Code diff information can only be obtained from a separate query.
-        pr_detail = AttrDict(_request(f"https://api.github.com/repos/{repo.owner}/{repo.name}/pulls/{pr.number}").json())
+        pr_detail = AttrDict(
+            _request(f"https://api.github.com/repos/{repo.owner}/{repo.name}/pulls/{pr.number}", repo.token).json()
+        )
         prd.number.append(pr.number)
         prd.title.append(pr.title)
         prd.user.append(pr.user.login)
@@ -72,6 +74,8 @@ def _make_data_sources(repo: Repository, date_range: DateRange, json: Any) -> Pu
 
 
 def get_pullreq_data(repo: Repository, date_range: DateRange) -> pl.LazyFrame:
-    res = _request(f"https://api.github.com/repos/{repo.owner}/{repo.name}/pulls?state=closed&per_page=10")  # TODO: 50
+    res = _request(
+        f"https://api.github.com/repos/{repo.owner}/{repo.name}/pulls?state=closed&per_page=10", repo.token
+    )  # TODO: 50
     data_src = _make_data_sources(repo, date_range, res.json())
     return data_src.to_lazyframe()

@@ -1,3 +1,4 @@
+import sys
 from dataclasses import dataclass, field, InitVar
 from datetime import datetime, timezone, timedelta
 
@@ -13,6 +14,9 @@ class DateRange:
         # TODO: add Secured Validation
         start = self._get_monday() if start_arg is None else self._jst_to_utc(start_arg)
         end = datetime.now(timezone.utc) if end_arg is None else self._jst_to_utc(end_arg)
+        if start > end:
+            print(f"Error: Start Date: {start} > End Data: {end}", file=sys.stderr)
+            sys.exit(1)
         object.__setattr__(self, "start", start)
         object.__setattr__(self, "end", end)
 

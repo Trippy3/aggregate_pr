@@ -13,6 +13,11 @@ fmt:
 	$(VENV_BIN)/black .
 	$(VENV_BIN)/ruff .
 
+.PHONY: test
+test:
+	$(VENV_BIN)/pytest modules/tests/ -s -v --cov
+
+
 .PHONY: clean
 clean: 
 	@rm -rf .venv

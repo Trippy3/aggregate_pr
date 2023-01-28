@@ -25,6 +25,7 @@ def main():
         me.parent / f"{repo.name}_all_{date_range.start.strftime('%Y%m%d')}_{date_range.end.strftime('%Y%m%d')}.csv"
     )
     all_pr.collect().write_csv(all_pr_csv)
+    print(f"output: {all_pr_csv}")
     mean_pr = all_pr.select(
         [
             pl.col("number").count().alias("total_count"),
@@ -39,6 +40,7 @@ def main():
         me.parent / f"{repo.name}_mean_{date_range.start.strftime('%Y%m%d')}_{date_range.end.strftime('%Y%m%d')}.csv"
     )
     mean_pr.collect().write_csv(mean_pr_csv)
+    print(f"output: {mean_pr_csv}")
 
 
 if __name__ == "__main__":

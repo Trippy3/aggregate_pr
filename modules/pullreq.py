@@ -75,7 +75,7 @@ def _make_data_sources(repo: Repository, date_range: DateRange, json: Any) -> Pu
 
 def get_pullreq_data(repo: Repository, date_range: DateRange) -> pl.LazyFrame:
     res = _request(
-        f"https://api.github.com/repos/{repo.owner}/{repo.name}/pulls?state=closed&per_page=10", repo.token
+        f"https://api.github.com/repos/{repo.owner}/{repo.name}/pulls?state=closed&per_page=30", repo.token
     )  # TODO: 50
     data_src = _make_data_sources(repo, date_range, res.json())
     return data_src.to_lazyframe()

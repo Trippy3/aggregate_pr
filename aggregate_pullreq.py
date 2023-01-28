@@ -14,8 +14,10 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("addr", help="GitHub Repository URL", type=str)
     parser.add_argument("-t", "--token-file", help="GitHub Token file path", type=Path, default=None)
-    parser.add_argument("-s", "--start", help="Start Date. ex. 2023-01-21", type=str, default=None)
-    parser.add_argument("-e", "--end", help="End Date. ex. 2023-01-24", type=str, default=None)
+    parser.add_argument(
+        "-s", "--start", help="Start Date. ex: 2023-01-21  deafult: Monday of the week.", type=str, default=None
+    )
+    parser.add_argument("-e", "--end", help="End Date. ex: 2023-01-24 default: datetime.now()", type=str, default=None)
     args = parser.parse_args()
 
     repo = Repository(args.addr, args.token_file)

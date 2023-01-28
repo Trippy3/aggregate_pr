@@ -2,5 +2,8 @@ requests
 polars
 git+https://github.com/fierte-product-development/Standard-Library-Extension@2e6095af0f04e013b492bc9a497655071fdb9124 # fmodules
 pytest
+pytest-freezegun
+pytest-mock
+pytest-cov
 black==22.12.0
 ruff==0.0.209

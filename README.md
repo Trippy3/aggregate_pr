@@ -20,3 +20,7 @@ options:
   -e END, --end END     End Date. ex. 2023-01-24
 (.venv) $ python aggregate_pullreq.py https://github.com/Trippy3/aggregate_pr
 ~~~
+
+-----
+
+![Alt](https://repobeats.axiom.co/api/embed/c2280b8673dbde0c57706cfbd19fa97aa6b0c079.svg "Repobeats analytics image")

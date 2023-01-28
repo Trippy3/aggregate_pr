@@ -14,13 +14,11 @@ class TestRepository:
         assert repo.name == "aggregate_pr"
         assert repo.token is None
 
-
     token_files = [
         (None),
         ("./nonexistent_file"),
         (Path("./nonexistent_file")),
     ]
-
 
     @pytest.mark.parametrize("token_file", token_files)
     def test_RetunrsRepo_TakeAddrAndInvalidTokenFile(self, token_file):
@@ -28,7 +26,6 @@ class TestRepository:
         assert repo.owner == "Trippy3"
         assert repo.name == "aggregate_pr"
         assert repo.token is None
-
 
     def test_RetunrsRepo_TakeAddrAndTokenFile(self, tmp_path):
         CONTENT = "ghp_XXXXXXXXXXXXX"

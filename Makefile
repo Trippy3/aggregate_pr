@@ -17,4 +17,5 @@ fmt:
 clean: 
 	@rm -rf .venv
 	@rm -rf ./modules/pytest_cache/
+	@rm -rf .pytest_cache/
 	@rm -rf .ruff_cache/

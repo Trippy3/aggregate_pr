@@ -9,12 +9,12 @@ VENV_BIN = $(VENV)/bin
 	$(VENV_BIN)/pip install -r requirements.txt
 
 .PHONY: fmt
-fmt: .venv
+fmt:
 	$(VENV_BIN)/black .
 	$(VENV_BIN)/ruff .
 
 .PHONY: clean
 clean: 
 	@rm -rf .venv
-	@rm -rf .pytest_cache/
+	@rm -rf ./modules/pytest_cache/
 	@rm -rf .ruff_cache/

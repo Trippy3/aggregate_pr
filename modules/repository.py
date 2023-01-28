@@ -18,9 +18,7 @@ class Repository:
         url_path = urlparse(addr).path
         object.__setattr__(self, "owner", url_path.split("/")[1])  # path is "/owner/repo"
         object.__setattr__(self, "name", url_path.split("/")[2])
-        if token_file is None:
-            token_file = me.parents[1] / ".token"
-        if not token_file.exists():
+        if token_file is None or not Path(token_file).exists():
             print(f"Warning: Token file does not exist. path: {token_file}")
             return
         with open(token_file, "r") as f:

@@ -1,10 +1,10 @@
 # aggregate_pr
 [![codecov](https://codecov.io/gh/Trippy3/aggregate_pr/branch/main/graph/badge.svg?token=OS3J2YRBR2)](https://codecov.io/gh/Trippy3/aggregate_pr)
-[![CodeScene general](https://codescene.io/images/analyzed-by-codescene-badge.svg)](https://codescene.io/projects/34295)
+[![Actions status](https://github.com/Trippy3/aggregate_pr/actions/workflows/ci.yml/badge.svg)](https://github.com/Trippy3/aggregate_pr/actions)
 
 Aggregate pull requests for a specific repository on GitHub over a period of time.  
-Currently, two types of csv are output.
-
+Currently, two types of csv are output.  
+Note: Works with Python 3.10 or later.
 
 ## Usage
 ~~~bash
@@ -87,3 +87,5 @@ total_count,read_time_hr,additions,deletions,difference,changed_files
 -----
 ## Stats
 ![Alt](https://repobeats.axiom.co/api/embed/c2280b8673dbde0c57706cfbd19fa97aa6b0c079.svg "Repobeats analytics image")
+-----
+[![CodeScene general](https://codescene.io/images/analyzed-by-codescene-badge.svg)](https://codescene.io/projects/34295)

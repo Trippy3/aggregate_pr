@@ -1,0 +1,44 @@
+name: Test Python workflow for Codecov
+on: [push]
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    env:
+      OS: ubuntu-latest
+      PYTHON: '3.10'
+    steps:
+    - uses: actions/checkout@master
+    
+    - name: Setup Python
+      uses: actions/setup-python@master
+      with:
+        python-version: 3.10
+        cache: 'pip'
+        cache-dependency-path: 'aggregate_pr/requirements.txt'
+    
+    - name: Create virtual environment
+      run: |
+        python -m venv .venv
+        source .venv/bin/activate
+        
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Generate coverage report
+      run: |
+        pytest modules/tests/ -s -v --cov=./ --cov-report=xml
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        directory: ./coverage/reports/
+        env_vars: OS,PYTHON
+        fail_ci_if_error: true
+        files: ./coverage1.xml,./coverage2.xml
+        flags: unittests
+        name: codecov-umbrella
+        path_to_write_report: ./coverage/codecov_report.txt
+        verbose: true

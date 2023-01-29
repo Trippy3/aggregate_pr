@@ -1,4 +1,6 @@
 # aggregate_pr
+[![codecov](https://codecov.io/gh/Trippy3/aggregate_pr/branch/main/graph/badge.svg?token=OS3J2YRBR2)](https://codecov.io/gh/Trippy3/aggregate_pr)
+
 Aggregate pull requests for a specific repository on GitHub over a period of time.  
 Currently, two types of csv are output.
 

@@ -1,4 +1,4 @@
-name: Test Python workflow for Codecov
+name: CI
 on: [push, pull_request]
 jobs:
   run:

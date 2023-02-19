@@ -2,6 +2,7 @@ import sys
 from typing import Any
 from datetime import datetime
 from dataclasses import dataclass, field, asdict
+from string import Template
 
 import requests
 import polars as pl
@@ -9,7 +10,6 @@ import polars as pl
 from fmodules.dict_wrapper import AttrDict
 
 from .repository import Repository
-from .date_range import DateRange
 
 
 @dataclass
@@ -26,56 +26,98 @@ class PullReqData:
     deletions: list[int] = field(default_factory=list)
     difference: list[int] = field(default_factory=list)
     changed_files: list[int] = field(default_factory=list)
+    url: list[str] = field(default_factory=list)
 
     def to_lazyframe(self) -> pl.LazyFrame:
         return pl.DataFrame(asdict(self)).lazy()
 
 
-def _request(addr: str, token: str | None) -> requests.Response:
-    headers = {"User-Agent": "githubapi", "Accept": "application/vnd.github+json"}
-    if token:
-        headers["Authorization"] = f"token {token}"
-    res = requests.get(addr, headers=headers)
+PR_QUERY = Template(
+    """
+    query {
+        repository(owner: "$owner", name: "$reponame") {
+            pullRequests(last: 100, states: MERGED, $before) {
+                nodes {
+                    number
+                    title
+                    author {
+                        login
+                    }
+                    labels(first: 10) {
+                        nodes {
+                            name
+                        }
+                    }
+                    milestone {
+                        title
+                    }
+                    createdAt
+                    mergedAt
+                    additions
+                    deletions
+                    changedFiles
+                    url
+                }
+                pageInfo {
+                    hasPreviousPage
+                    startCursor
+                }
+            }
+        }
+    }
+    """
+)
+
+
+def _request(repo: Repository, start_cursor: str | None) -> requests.Response:
+    headers = {"User-Agent": "githubapi"}
+    if repo.token:
+        headers["Authorization"] = f"bearer {repo.token}"
+    pr_args = f'before: "{start_cursor}"' if start_cursor else ""
+    query: str = PR_QUERY.substitute(owner=repo.owner, reponame=repo.name, before=pr_args)
+    res = requests.post("https://api.github.com/graphql", json={"query": query}, headers=headers)
     if res.status_code != requests.codes.ok:
-        print(f"Error: GET Status: {res.status_code}, Address: {addr}", file=sys.stderr)
+        print(f"Error Status: {res.status_code}", file=sys.stderr)
         sys.exit(1)
     return res
 
 
-def _make_data_sources(repo: Repository, date_range: DateRange, json: Any) -> PullReqData:
+def _make_data_sources(json: list[dict[Any]]) -> PullReqData:
     prd = PullReqData()
     for pull_request in json:
-        if (pr := AttrDict(pull_request)) is False:
-            print("Warning: The retrieved json content was empty.")
-            return prd
-        if pr.merged_at is None:  # PRs closed without merging are not needed for aggregation
-            continue
-        if (created_at := datetime.strptime(pr.created_at, "%Y-%m-%dT%H:%M:%S%z")) < date_range.start or (
-            merged_at := datetime.strptime(pr.merged_at, "%Y-%m-%dT%H:%M:%S%z")
-        ) > date_range.end:
-            continue
-        # Code diff information can only be obtained from a separate query.
-        pr_detail = AttrDict(
-            _request(f"https://api.github.com/repos/{repo.owner}/{repo.name}/pulls/{pr.number}", repo.token).json()
-        )
+        pr = AttrDict(pull_request)
         prd.number.append(pr.number)
         prd.title.append(pr.title)
-        prd.user.append(pr.user.login)
-        prd.labels.append(",".join([lable["name"] for lable in pr.labels]) if pr.labels else None)
+        prd.user.append(pr.author.login)
+        # TODO: Check if the .parquet data type accepts list[str]
+        prd.labels.append(",".join([lable["name"] for lable in pr.labels.nodes]) if pr.labels.nodes else None)
         prd.milestone.append(pr.milestone.title if pr.milestone is not None else None)
-        prd.created_at.append(created_at)
-        prd.merged_at.append(merged_at)
+        prd.created_at.append(created_at := datetime.strptime(pr.createdAt, "%Y-%m-%dT%H:%M:%S%z"))
+        prd.merged_at.append(merged_at := datetime.strptime(pr.mergedAt, "%Y-%m-%dT%H:%M:%S%z"))
         prd.read_time_hr.append(round((merged_at - created_at).total_seconds() / (60 * 60), 2))  # sec. to hour
-        prd.additions.append(pr_detail.additions)
-        prd.deletions.append(pr_detail.deletions)
-        prd.difference.append(pr_detail.additions + pr_detail.deletions)
-        prd.changed_files.append(pr_detail.changed_files)
+        prd.additions.append(pr.additions)
+        prd.deletions.append(pr.deletions)
+        prd.difference.append(pr.additions + pr.deletions)
+        prd.changed_files.append(pr.changedFiles)
+        prd.url.append(pr.url)
     return prd
 
 
-def get_pullreq_data(repo: Repository, date_range: DateRange) -> pl.LazyFrame:
-    res = _request(
-        f"https://api.github.com/repos/{repo.owner}/{repo.name}/pulls?state=closed&per_page=30", repo.token
-    )  # TODO: 50
-    data_src = _make_data_sources(repo, date_range, res.json())
+def get_pullreq_data(repo: Repository, is_recursive: bool = False) -> pl.LazyFrame:
+    pr_nodes = []
+    if is_recursive:
+        has_previous_page = True
+        start_cursor: str | None = None
+        while has_previous_page:
+            res = _request(repo, start_cursor)
+            # TODO: case: res["Error"]
+            pr = AttrDict(res.json()["data"]["repository"]["pullRequests"])
+            has_previous_page = pr.pageInfo.hasPreviousPage
+            start_cursor = pr.pageInfo.startCursor
+            pr_nodes += pr.nodes
+    else:
+        res = _request(repo, None)
+        # TODO: case: res["Error"]
+        pr_nodes += res.json()["data"]["repository"]["pullRequests"]["nodes"]
+    data_src = _make_data_sources(pr_nodes)
     return data_src.to_lazyframe()

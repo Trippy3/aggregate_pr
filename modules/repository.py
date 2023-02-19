@@ -2,8 +2,6 @@ from pathlib import Path
 from dataclasses import dataclass, field, InitVar
 from urllib.parse import urlparse
 
-me = Path(__file__).resolve()
-
 
 @dataclass(frozen=True)
 class Repository:

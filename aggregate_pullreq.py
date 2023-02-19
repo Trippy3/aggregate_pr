@@ -40,17 +40,18 @@ def main():
     all_pr: pl.LazyFrame = get_pullreq_data(repo, args.init)
     all_pr.sink_parquet(args.out_dir / "pr.parquet")
     all_pr.collect().write_csv(args.out_dir / "pr.csv")
-    print(f"Data file output to {args.out_dir}.")
+    print(f"Data file output to {args.out_dir}")
     mean_pr = all_pr.select(
         [
             pl.col("number").count().alias("total_count"),
-            pl.col("read_time_hr").mean(),
+            pl.col("read_time_hr").mean().round(4),
             pl.col("additions").mean(),
             pl.col("deletions").mean(),
             pl.col("difference").mean(),
             pl.col("changed_files").mean(),
         ]
     )
+    print("The total number of merged PRs obtained and average value are shown below.")
     mean_pr.collect().glimpse()
 
 

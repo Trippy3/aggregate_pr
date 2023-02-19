@@ -32,7 +32,7 @@ jobs:
     
     - name: Generate coverage report
       run: |
-        pytest modules/tests/ -s -v --cov=./ --cov-report=xml
+        pytest -s -v --cov=./ --cov-report=xml
     
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3

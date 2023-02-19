@@ -2,9 +2,13 @@
 [![codecov](https://codecov.io/gh/Trippy3/aggregate_pr/branch/main/graph/badge.svg?token=OS3J2YRBR2)](https://codecov.io/gh/Trippy3/aggregate_pr)
 [![Actions status](https://github.com/Trippy3/aggregate_pr/actions/workflows/ci.yml/badge.svg)](https://github.com/Trippy3/aggregate_pr/actions)
 
-Aggregate pull requests for a specific repository on GitHub over a period of time.  
-Currently, two types of csv are output.  
-Note: Works with Python 3.10 or later.
+Get the merged PR of the specified GitHub repository.  
+Currently, output .parquet and .csv.
+
+### Note:
+- Works with Python 3.10 or later.
+- To access a given repository, please obtain an access token in advance.
+Please refer to [the official GitHub documentation](https://docs.github.com/en/graphql/guides/forming-calls-with-graphql#authenticating-with-graphql).
 
 ## Usage
 ~~~bash
@@ -12,7 +16,9 @@ $ make .venv
 $ source .venv/bin/activate
 
 (.venv) $ python aggregate_pullreq.py -h
-usage: aggregate_pullreq.py [-h] [-t TOKEN_FILE] [-s START] [-e END] addr
+usage: aggregate_pullreq.py [-h] [-t TOKEN_FILE] [-i] [-o OUT_DIR] addr
+
+Retrieve the 100 latest merged PRs from the specified repository.
 
 positional arguments:
   addr                  GitHub Repository URL
@@ -20,30 +26,41 @@ positional arguments:
 options:
   -h, --help            show this help message and exit
   -t TOKEN_FILE, --token-file TOKEN_FILE
-                        GitHub Token file path
-  -s START, --start START
-                        Start Date. ex: 2023-01-21 deafult: Monday of the week.
-  -e END, --end END     End Date. ex: 2023-01-24 default: datetime.now()
+                        GitHub Token file path. default: ./.token
+  -i, --init            Get all merged PRs; specify if you want to retrieve more than 100 merged PRs.
+  -o OUT_DIR, --out-dir OUT_DIR
+                        Specifies the directory to which the data will be output. default: ./data
+
 
 (.venv) $ python aggregate_pullreq.py https://github.com/Trippy3/aggregate_pr
-Warning: Token file does not exist. path: None
-output: {current dir}/aggregate_pr/aggregate_pr_all_20230122_20230128.csv
-output: {current dir}/aggregate_pr/aggregate_pr_mean_20230122_20230128.csv
+Data file output to /home/gretra/seventh_gene/seventh_src/aggregate_pr/data
+The total number of merged PRs obtained and average value are shown below.
+Rows: 1
+Columns: 6
+$ total_count   <u32> 5
+$ read_time_hr  <f64> 0.214
+$ additions     <f64> 97.8
+$ deletions     <f64> 9.8
+$ difference    <f64> 107.6
+$ changed_files <f64> 6.8
+
+(.venv) $ ls ./data/pr*
+./data/pr.csv  ./data/pr.parquet
 ~~~
-- If you want to get PR for private repositories, please pass a token file.
+- If you want to get PR for repositories, please pass a token file.
 ~~~bash
-$ cat .token_file
+$ cat .token
 ghp_XXXXXXXXXXXX
 ~~~
-- If start and end dates are not specified, the default settings are used.  
-Note: Currently, only Japan Standard Time (JST) is supported.
-    - The Monday of that week will be the start date.
-    - The present date and time will be the end date. 
+- If you want to get more than 100 PRs in the past, please specify the "--init" option.  
+Note: Depending on the number of PRs, it may take some time to retrieve them.
+~~~bash
+(.venv) $ python aggregate_pullreq.py https://github.com/Trippy3/aggregate_pr --init
+~~~
 
 ## Output
-Two types of csv are output.
-### 1. Details of each PR
-A csv with the following columns is output.
+### Data Column
+A csv and parquet with the following columns is output.
 | Column Name | Type | Description |
 | :--- | :--- | :--- |
 | number | int | PR Number |
@@ -58,30 +75,20 @@ A csv with the following columns is output.
 | deletions | int | Deletion code lines |
 | difference | int | Code delta of lines |
 | changed_files | int | Number of files changed |
+| url | str | PR URL |
 
 #### Example: 
 ~~~
-number,title,user,labels,milestone,created_at,merged_at,read_time_hr,additions,deletions,difference,changed_files
-7,update: support private repo,hiro-torii,"enhancement,good first issue",,2023-01-27 10:58:59 UTC,2023-01-27 11:56:26 UTC,0.96,11,7,18,1
-6,fix the code according to the linter,Trippy3,,,2023-01-25 14:21:55 UTC,2023-01-25 14:26:36 UTC,0.08,20,10,30,6
-4,v.0.0.1,Trippy3,,,2023-01-24 17:40:56 UTC,2023-01-24 17:41:39 UTC,0.01,241,1,242,13
-~~~
++----------+--------------------------------------+------------+------------------------------+-------------+---------------------------+---------------------------+----------------+-------------+-------------+--------------+-----------------+------------------------------------------------+
+|   number | title                                | user       | labels                       |   milestone | created_at                | merged_at                 |   read_time_hr |   additions |   deletions |   difference |   changed_files | url                                            |
+|----------+--------------------------------------+------------+------------------------------+-------------+---------------------------+---------------------------+----------------+-------------+-------------+--------------+-----------------+------------------------------------------------|
+|        1 | Feature/first version                | Trippy3    |                              |         nan | 2023-01-20 05:21:11+00:00 | 2023-01-20 05:22:13+00:00 |           0.02 |          20 |           0 |           20 |               3 | https://github.com/Trippy3/aggregate_pr/pull/1 |
+|        4 | v.0.0.1                              | Trippy3    |                              |         nan | 2023-01-24 17:40:56+00:00 | 2023-01-24 17:41:39+00:00 |           0.01 |         241 |           1 |          242 |              13 | https://github.com/Trippy3/aggregate_pr/pull/4 |
+|        6 | fix the code according to the linter | Trippy3    |                              |         nan | 2023-01-25 14:21:55+00:00 | 2023-01-25 14:26:36+00:00 |           0.08 |          20 |          10 |           30 |               6 | https://github.com/Trippy3/aggregate_pr/pull/6 |
+|        7 | update: support private repo         | hiro-torii | enhancement,good first issue |         nan | 2023-01-27 10:58:59+00:00 | 2023-01-27 11:56:26+00:00 |           0.96 |          11 |           7 |           18 |               1 | https://github.com/Trippy3/aggregate_pr/pull/7 |
+|        9 | WIP: Feature/#2/tests                | Trippy3    | documentation,enhancement    |         nan | 2023-01-28 18:03:15+00:00 | 2023-01-28 18:03:28+00:00 |           0    |         197 |          31 |          228 |              11 | https://github.com/Trippy3/aggregate_pr/pull/9 |
++----------+--------------------------------------+------------+------------------------------+-------------+---------------------------+---------------------------+----------------+-------------+-------------+--------------+-----------------+------------------------------------------------+
 
-### 2. Total and average of each PR
-A csv with the following columns is output.
-| Column Name | Type | Description |
-| :--- | :--- | :--- |
-| total_count | int | Total number of each PR |
-| read_time_hr | float | The average time from creation to merge for each PR |
-| additions | float | Average number of additional code lines for each PR |
-| deletions | float | Average number of delete code lines for each PR |
-| difference | float | Average number of change code lines for each PR |
-| changed_files | float | Average number of files changed for each PR |
-
-#### Example: 
-~~~
-total_count,read_time_hr,additions,deletions,difference,changed_files
-3,0.35000000000000003,90.66666666666667,6.0,96.66666666666667,6.666666666666667
 ~~~
 
 -----

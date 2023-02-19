@@ -4,8 +4,9 @@ import sys
 
 import polars as pl
 
-from .modules.repository import Repository
-from .modules.pullreq import get_pullreq_data
+from modules.repository import Repository
+from modules.pullreq import get_pullreq_data
+
 
 me = Path(__file__).resolve()
 

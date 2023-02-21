@@ -15,7 +15,7 @@ fmt:
 
 .PHONY: test
 test:
-	$(VENV_BIN)/pytest modules/tests/ -s -v --cov
+	$(VENV_BIN)/pytest -s -v --cov
 
 
 .PHONY: clean
@@ -24,3 +24,7 @@ clean:
 	@rm -rf ./modules/pytest_cache/
 	@rm -rf .pytest_cache/
 	@rm -rf .ruff_cache/
+
+.PHONY: data_clear
+data_clear: 
+	@rm -f ./data/

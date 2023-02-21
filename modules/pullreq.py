@@ -16,7 +16,7 @@ from .repository import Repository
 class PullReqData:
     number: list[int] = field(default_factory=list)
     title: list[str] = field(default_factory=list)
-    user: list[str] = field(default_factory=list)
+    user: list[str | None] = field(default_factory=list)
     labels: list[str | None] = field(default_factory=list)
     milestone: list[str | None] = field(default_factory=list)
     created_at: list[datetime] = field(default_factory=list)
@@ -88,10 +88,10 @@ def _make_data_sources(json: list[dict[Any]]) -> PullReqData:
         pr = AttrDict(pull_request)
         prd.number.append(pr.number)
         prd.title.append(pr.title)
-        prd.user.append(pr.author.login)
+        prd.user.append(pr.author.login if pr.author else None)
         # TODO: Check if the .parquet data type accepts list[str]
         prd.labels.append(",".join([lable["name"] for lable in pr.labels.nodes]) if pr.labels.nodes else None)
-        prd.milestone.append(pr.milestone.title if pr.milestone is not None else None)
+        prd.milestone.append(pr.milestone.title if pr.milestone else None)
         prd.created_at.append(created_at := datetime.strptime(pr.createdAt, "%Y-%m-%dT%H:%M:%S%z"))
         prd.merged_at.append(merged_at := datetime.strptime(pr.mergedAt, "%Y-%m-%dT%H:%M:%S%z"))
         prd.read_time_hr.append(round((merged_at - created_at).total_seconds() / (60 * 60), 2))  # sec. to hour

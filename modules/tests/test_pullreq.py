@@ -37,7 +37,7 @@ class TestPullReqData:
         prd = pr.PullReqData(
             [1, 2],
             ["a", "b"],
-            ["a", "b"],
+            ["a", None],
             ["a", None],
             ["a", None],
             [datetime(2023, 1, 29, 10, 0, 0, tzinfo=timezone.utc), datetime(2023, 1, 29, 11, 0, 0, tzinfo=timezone.utc)],

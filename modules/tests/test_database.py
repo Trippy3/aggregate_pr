@@ -43,10 +43,10 @@ class Test_write_data:
             assert ret.sql(f"SELECT * FROM {db.top_table}").pl().glimpse(True) == ldf.collect().glimpse(True)
             db.conn.close()
             db = Database(Path(dir) / "test_write.db", DBMode.DELTA)  # Case by existing db file
-            add_ldf = pl.DataFrame({"number": [2, 5], "labels": ["four", None]}).lazy()
+            add_ldf = pl.DataFrame({"number": [2, 9], "labels": ["four", None]}).lazy()
             ret = db.write_data(add_ldf)
-            exceptd = pl.concat([ldf, add_ldf], parallel=False)
-            assert ret.sql(f"SELECT * FROM {db.top_table}").pl().glimpse(True) == exceptd.collect().glimpse(True)
+            expected = pl.concat([ldf, add_ldf.join(ldf, on="number", how="anti")], parallel=False)
+            assert ret.sql(f"SELECT * FROM {db.top_table}").pl().glimpse(True) == expected.collect().glimpse(True)
 
 
 class Test_to_parquet:

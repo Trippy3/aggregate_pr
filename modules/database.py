@@ -7,6 +7,7 @@ import duckdb as ddb
 import polars as pl
 
 TOP_TABLE = "merged_pr"
+ALL_SELECT = f"SELECT * FROM {TOP_TABLE}"
 me = Path(__file__).resolve()
 
 
@@ -39,19 +40,24 @@ class Database:
         return ddb.connect(str(self.path))
 
     def write_data(self, ldf: pl.LazyFrame) -> ddb.DuckDBPyConnection:
+        def get_only_additional(new: pl.LazyFrame) -> pl.LazyFrame:
+            original = self.conn.sql(f"{ALL_SELECT}").pl().lazy()
+            return new.join(original, on="number", how="anti")
+
         ddb.sql("SELECT * FROM ldf")  # TODO: Investigate why it is necessary
         if self.mode == DBMode.OVERWRITE:
             self.conn.cursor().execute(f"CREATE TABLE {self.top_table} AS SELECT * FROM ldf")
         elif self.mode == DBMode.DELTA:
-            self.conn.append(self.top_table, ldf.collect().to_pandas())
+            only_add = get_only_additional(ldf)
+            self.conn.append(self.top_table, only_add.collect().to_pandas())
         return self.conn
 
     def to_parquet(self) -> Path:
         parquet = self.path.parent / "pr.parquet"
-        self.conn.sql(f"SELECT * FROM {self.top_table}").write_parquet(str(parquet))
+        self.conn.sql(f"{ALL_SELECT}").write_parquet(str(parquet))
         return parquet
 
     def to_csv(self) -> Path:
         csv = self.path.parent / "pr.csv"
-        self.conn.sql(f"SELECT * FROM {self.top_table}").write_csv(str(csv), header=True)
+        self.conn.sql(f"{ALL_SELECT}").write_csv(str(csv), header=True)
         return csv

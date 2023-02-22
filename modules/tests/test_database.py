@@ -7,8 +7,6 @@ import duckdb as ddb
 
 from ..database import Database, DBMode
 
-me = Path(__file__).resolve()
-
 
 @pytest.fixture(scope="class")
 def rw_db() -> Database:

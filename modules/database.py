@@ -41,7 +41,7 @@ class Database:
 
     def write_data(self, ldf: pl.LazyFrame) -> ddb.DuckDBPyConnection:
         def get_only_additional(new: pl.LazyFrame) -> pl.LazyFrame:
-            original = self.conn.sql(f"{ALL_SELECT}").pl().lazy()
+            original = self.to_ldf()
             return new.join(original, on="number", how="anti")
 
         ddb.sql("SELECT * FROM ldf")  # TODO: Investigate why it is necessary
@@ -51,6 +51,9 @@ class Database:
             only_add = get_only_additional(ldf)
             self.conn.append(self.top_table, only_add.collect().to_pandas())
         return self.conn
+
+    def to_ldf(self) -> pl.LazyFrame:
+        return self.conn.sql(f"{ALL_SELECT}").pl().lazy()
 
     def to_parquet(self) -> Path:
         parquet = self.path.parent / "pr.parquet"

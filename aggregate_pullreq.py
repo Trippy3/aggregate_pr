@@ -5,6 +5,7 @@ import sys
 import polars as pl
 
 from modules.repository import Repository
+from modules.database import Database, DBMode
 from modules.pullreq import get_pullreq_data
 
 
@@ -37,22 +38,26 @@ def main():
         sys.exit(1)
     args.out_dir.mkdir(parents=True, exist_ok=True)
     repo = Repository(args.addr, args.token_file)
+    db = Database(args.out_dir/"pr.db", DBMode.OVERWRITE if args.init else DBMode.DELTA)
     all_pr: pl.LazyFrame = get_pullreq_data(repo, args.init)
-    all_pr.sink_parquet(args.out_dir / "pr.parquet")
-    all_pr.collect().write_csv(args.out_dir / "pr.csv")
+    db.write_data(all_pr)
+    db.to_parquet()
+    db.to_csv()
     print(f"Data file output to {args.out_dir}")
-    mean_pr = all_pr.select(
+    mean_pr = db.to_ldf().select(
         [
-            pl.col("number").count().alias("total_count"),
-            pl.col("read_time_hr").mean().round(4),
-            pl.col("additions").mean(),
-            pl.col("deletions").mean(),
-            pl.col("difference").mean(),
-            pl.col("changed_files").mean(),
+            pl.col("number").count().alias("Total count"),
+            pl.col("read_time_hr").mean().round(4).alias("Read time[hr]"),
+            pl.col("additions").mean().alias("add [line/PR-count]"),
+            pl.col("deletions").mean().alias("del [line/PR-count]"),
+            pl.col("difference").mean().alias("delta [line/PR-count]"),
+            pl.col("changed_files").mean().alias("files[count/PR-count]"),
         ]
     )
-    print("The total number of merged PRs obtained and average value are shown below.")
-    mean_pr.collect().glimpse()
+    print("The total number of merged PRs obtained and each average values are shown below.")
+    with pl.Config() as cfg:
+        pl.cfg.Config.set_tbl_cols(7)
+        print(mean_pr.collect())
 
 
 if __name__ == "__main__":

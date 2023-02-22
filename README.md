@@ -34,18 +34,19 @@ options:
 
 (.venv) $ python aggregate_pullreq.py https://github.com/Trippy3/aggregate_pr
 Data file output to /home/gretra/seventh_gene/seventh_src/aggregate_pr/data
-The total number of merged PRs obtained and average value are shown below.
-Rows: 1
-Columns: 6
-$ total_count   <u32> 5
-$ read_time_hr  <f64> 0.214
-$ additions     <f64> 97.8
-$ deletions     <f64> 9.8
-$ difference    <f64> 107.6
-$ changed_files <f64> 6.8
+The total number of merged PRs obtained and each average values are shown below.
+shape: (1, 6)
+┌─────────────┬───────────────┬─────────────────────┬─────────────────────┬───────────────────────┬───────────────────────┐
+│ Total count ┆ Read time[hr] ┆ add [line/PR-count] ┆ del [line/PR-count] ┆ delta [line/PR-count] ┆ files[count/PR-count] │
+│ ---         ┆ ---           ┆ ---                 ┆ ---                 ┆ ---                   ┆ ---                   │
+│ u32         ┆ f64           ┆ f64                 ┆ f64                 ┆ f64                   ┆ f64                   │
+╞═════════════╪═══════════════╪═════════════════════╪═════════════════════╪═══════════════════════╪═══════════════════════╡
+│ 7           ┆ 0.67          ┆ 105.428571          ┆ 32.428571           ┆ 137.857143            ┆ 7.142857              │
+└─────────────┴───────────────┴─────────────────────┴─────────────────────┴───────────────────────┴───────────────────────┘
+
 
 (.venv) $ ls ./data/pr*
-./data/pr.csv  ./data/pr.parquet
+./data/pr.csv  ./data/pr.db  ./data/pr.parquet
 ~~~
 - If you want to get PR for repositories, please pass a token file.
 ~~~bash

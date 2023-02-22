@@ -1,9 +1,17 @@
+# Dependencies
 requests
-polars==0.16.6
+duckdb==0.7.0
+polars==0.16.7
+pyarrow==11.0.0
+numpy==1.24.2
 git+https://github.com/fierte-product-development/Standard-Library-Extension@2e6095af0f04e013b492bc9a497655071fdb9124 # fmodules
+
+# Tooling
 pytest
-pytest-freezegun
 pytest-mock
 pytest-cov
+parquet-tools==0.2.12
+
+# Linter
 black==22.12.0
 ruff==0.0.209

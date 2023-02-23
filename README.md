@@ -105,6 +105,9 @@ $ rill start
 
 ~~~
 
+![Screenshot from Rill](https://user-images.githubusercontent.com/4991409/220907918-0432b718-77fa-475a-8d06-9cedc2bc098e.png)
+
+
 -----
 ## Stats
 ![Alt](https://repobeats.axiom.co/api/embed/c2280b8673dbde0c57706cfbd19fa97aa6b0c079.svg "Repobeats analytics image")

@@ -38,7 +38,7 @@ def main():
         sys.exit(1)
     args.out_dir.mkdir(parents=True, exist_ok=True)
     repo = Repository(args.addr, args.token_file)
-    db = Database(args.out_dir/"pr.db", DBMode.OVERWRITE if args.init else DBMode.DELTA)
+    db = Database(args.out_dir / "pr.db", DBMode.OVERWRITE if args.init else DBMode.DELTA)
     all_pr: pl.LazyFrame = get_pullreq_data(repo, args.init)
     db.write_data(all_pr)
     db.to_parquet()
@@ -56,7 +56,7 @@ def main():
     )
     print("The total number of merged PRs obtained and each average values are shown below.")
     with pl.Config() as cfg:
-        pl.cfg.Config.set_tbl_cols(7)
+        cfg.set_tbl_cols(7)
         print(mean_pr.collect())
 
 

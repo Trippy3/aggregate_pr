@@ -11,25 +11,70 @@ from ..repository import Repository
 
 me = Path(__file__).resolve()
 
-# TODO: define test json
+
+@pytest.fixture(scope="class")
+def repo() -> Repository:
+    return Repository("https://github.com/dummy/dummy", me.parents[2] / ".dummy_token")
+
+
+DUMMY_JSON = {
+    "data": {
+        "repository": {
+            "pullRequests": {
+                "nodes": [
+                    {
+                        "number": 7,
+                        "title": "update: support private repo",
+                        "author": {"login": "hiro-torii"},
+                        "labels": {"nodes": [{"name": "enhancement"}, {"name": "good first issue"}]},
+                        "milestone": None,
+                        "createdAt": "2023-01-27T10:58:59Z",
+                        "mergedAt": "2023-01-27T11:56:26Z",
+                        "additions": 11,
+                        "deletions": 7,
+                        "changedFiles": 1,
+                        "url": "https://github.com/Trippy3/aggregate_pr/pull/7",
+                    },
+                    {
+                        "number": 9,
+                        "title": "WIP: Feature/#2/tests",
+                        "author": {"login": "Trippy3"},
+                        "labels": {"nodes": [{"name": "documentation"}, {"name": "enhancement"}]},
+                        "milestone": None,
+                        "createdAt": "2023-01-28T18:03:15Z",
+                        "mergedAt": "2023-01-28T18:03:28Z",
+                        "additions": 197,
+                        "deletions": 31,
+                        "changedFiles": 11,
+                        "url": "https://github.com/Trippy3/aggregate_pr/pull/9",
+                    },
+                ],
+                "pageInfo": {"hasPreviousPage": False, "startCursor": "Y3Vyc29yOnYyOpHOSKqCYg=="},
+            }
+        }
+    }
+}
+
+
+class DummyPost:
+    status_code = requests.codes.ok
+
+    def json(self):
+        return DUMMY_JSON
 
 
 class Test_request:
-    @pytest.fixture(scope="class")
-    def repo(self) -> Repository:
-        # TODO: Consider testing methods that do not rely on token.
-        return Repository("https://github.com/Trippy3/aggregate_pr", me.parents[2] / ".token")
-
     def test_Exit_IfGetErrorCode(self, mocker, repo):
-        response_mock = mocker.Mock()
-        response_mock.status_code = 404
-        mocker.patch.object(requests, "post", return_value=response_mock)
+        requests_mock = mocker.Mock()
+        requests_mock.status_code = 404
+        mocker.patch.object(requests, "post", return_value=requests_mock)
         with pytest.raises(SystemExit):
             pr._request(repo, None)
 
-    def test_ReturnsResponse(self, repo):
-        res = pr._request(repo, "Y3Vyc29yOnYyOpHOSKqCYg==")
-        assert res.json()["data"]["repository"]["pullRequests"]["nodes"][-1]["number"] == 6
+    def test_ReturnsResponse(self, mocker, repo):
+        mocker.patch("requests.post", return_value=DummyPost())
+        res = pr._request(repo, None)
+        assert res.json()["data"]["repository"]["pullRequests"]["nodes"][-1]["number"] == 9
 
 
 class TestPullReqData:
@@ -53,15 +98,16 @@ class TestPullReqData:
 
 
 class Test_get_pullreq_data:
-    @pytest.fixture(scope="class")
-    def repo(self) -> Repository:
-        # TODO: Consider testing methods that do not rely on token.
-        return Repository("https://github.com/Trippy3/aggregate_pr", me.parents[2] / ".token")
+    def test_ReturnsLazyFrame_IfRecursive(self, mocker, repo):
+        # TODO: Case by "hasPreviousPage": True
+        mocker.patch.object(pr, "_request", return_value=DummyPost())
+        recursive = pr.get_pullreq_data(repo, is_recursive=True).collect().to_dicts()
+        assert recursive[-1]["number"] == 9
 
-    def test_ReturnsSameLazyFrame_RecursiveOrNot(self, repo):
-        recursive = pr.get_pullreq_data(repo, is_recursive=True).collect().glimpse(return_as_string=True)
-        not_recursive = pr.get_pullreq_data(repo).collect().glimpse(return_as_string=True)
-        assert recursive == not_recursive
+    def test_ReturnsLazyFrame_IfNotRecursive(self, mocker, repo):
+        mocker.patch.object(pr, "_request", return_value=DummyPost())
+        not_recursive = pr.get_pullreq_data(repo).collect().to_dicts()
+        assert not_recursive[-1]["number"] == 9
 
 
 class Test_make_data_sources:

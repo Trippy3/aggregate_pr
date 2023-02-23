@@ -1,0 +1,31 @@
+# Visit https://docs.rilldata.com/references/project-files to learn more about Rill project files.
+
+display_name: "pr_dashboard"
+model: "pr_model"
+timeseries: "created_at"
+measures:
+  - label: PR count
+    expression: count(*)
+    description: Total merged PR count.
+    format_preset: humanize
+  - label: "PR size[line]"
+    expression: "sum(difference)/count(difference)"
+    description: "Avg. merged PR size[line]"
+    format_preset: humanize
+  - label: "PR read time[hr]"
+    expression: "sum(read_time_hr)/count(read_time_hr)"
+    description: "Avg. merged PR read time [ht]"
+    format_preset: humanize
+dimensions:
+  - label: Title
+    property: title
+    description: ""
+  - label: User
+    property: user
+    description: ""
+  - label: Labels
+    property: labels
+    description: ""
+  - label: Milestone
+    property: milestone
+    description: ""

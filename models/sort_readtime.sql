@@ -1,0 +1,1 @@
+select * FROM pr order by read_time_hr desc;

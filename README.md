@@ -92,6 +92,19 @@ A csv and parquet with the following columns is output.
 
 ~~~
 
+## Visualization with Rill
+[Rill](https://www.rilldata.com/) is Radically simple metrics dashboards.  
+Rill makes it easy to visualize the parquet output by "agrregate_pr".  Installation is from this [page](https://docs.rilldata.com/).
+~~~bash
+$ cd {your-path}/aggregate_pr
+$ rill start
+2023-02-23T21:21:10.166+0900	INFO	Hydrating project '{your-path}/aggregate_pr'
+2023-02-23T21:21:10.310+0900	INFO	Reconciled: /dashboards/pr_dashboard.yaml
+2023-02-23T21:21:10.310+0900	INFO	Hydration completed!
+2023-02-23T21:21:11.322+0900	INFO	Serving Rill on: http://localhost:9009
+
+~~~
+
 -----
 ## Stats
 ![Alt](https://repobeats.axiom.co/api/embed/c2280b8673dbde0c57706cfbd19fa97aa6b0c079.svg "Repobeats analytics image")

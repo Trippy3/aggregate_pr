@@ -46,7 +46,7 @@ class Database:
 
         ddb.sql("SELECT * FROM ldf")  # TODO: Investigate why it is necessary
         if self.mode == DBMode.OVERWRITE:
-            self.conn.cursor().execute(f"CREATE TABLE {self.top_table} AS SELECT * FROM ldf")
+            self.conn.sql(f"CREATE TABLE {self.top_table} AS SELECT * FROM ldf")
         elif self.mode == DBMode.DELTA:
             only_add = get_only_additional(ldf)
             self.conn.append(self.top_table, only_add.collect().to_pandas())

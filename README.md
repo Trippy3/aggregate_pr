@@ -8,7 +8,7 @@ Currently, output .parquet and .csv.
 ### Note:
 - Works with Python 3.10 or later.
 - To access a given repository, please obtain an access token in advance.
-Please refer to [the official GitHub documentation](https://docs.github.com/en/graphql/guides/forming-calls-with-graphql#authenticating-with-graphql).
+Please refer to [the official GitHub documentation](https://docs.github.com/en/graphql/guides/forming-calls-with-graphql#authenticating-with-graphql). Also [here](https://docs.github.com/ja/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
 
 ## Usage
 ~~~bash
@@ -32,7 +32,7 @@ options:
                         Specifies the directory to which the data will be output. default: ./data
 
 
-(.venv) $ python aggregate_pullreq.py https://github.com/Trippy3/aggregate_pr
+(.venv) $ python aggregate_pullreq.py https://github.com/Trippy3/aggregate_pr -t ./.token --init
 Data file output to /home/gretra/seventh_gene/seventh_src/aggregate_pr/data
 The total number of merged PRs obtained and each average values are shown below.
 shape: (1, 6)
@@ -41,9 +41,20 @@ shape: (1, 6)
 │ ---         ┆ ---           ┆ ---                 ┆ ---                 ┆ ---                   ┆ ---                   │
 │ u32         ┆ f64           ┆ f64                 ┆ f64                 ┆ f64                   ┆ f64                   │
 ╞═════════════╪═══════════════╪═════════════════════╪═════════════════════╪═══════════════════════╪═══════════════════════╡
-│ 7           ┆ 0.67          ┆ 105.428571          ┆ 32.428571           ┆ 137.857143            ┆ 7.142857              │
+│ 12          ┆ 0.4142        ┆ 87.25               ┆ 23.083333           ┆ 110.333333            ┆ 6.0                   │
 └─────────────┴───────────────┴─────────────────────┴─────────────────────┴───────────────────────┴───────────────────────┘
 
+(.venv) $ python aggregate_pullreq.py https://github.com/Trippy3/aggregate_pr -t ./.token
+Data file output to /home/gretra/seventh_gene/seventh_src/aggregate_pr/data
+The total number of merged PRs obtained and each average values are shown below.
+shape: (1, 6)
+┌─────────────┬───────────────┬─────────────────────┬─────────────────────┬───────────────────────┬───────────────────────┐
+│ Total count ┆ Read time[hr] ┆ add [line/PR-count] ┆ del [line/PR-count] ┆ delta [line/PR-count] ┆ files[count/PR-count] │
+│ ---         ┆ ---           ┆ ---                 ┆ ---                 ┆ ---                   ┆ ---                   │
+│ u32         ┆ f64           ┆ f64                 ┆ f64                 ┆ f64                   ┆ f64                   │
+╞═════════════╪═══════════════╪═════════════════════╪═════════════════════╪═══════════════════════╪═══════════════════════╡
+│ 12          ┆ 0.4142        ┆ 87.25               ┆ 23.083333           ┆ 110.333333            ┆ 6.0                   │
+└─────────────┴───────────────┴─────────────────────┴─────────────────────┴───────────────────────┴───────────────────────┘
 
 (.venv) $ ls ./data/pr*
 ./data/pr.csv  ./data/pr.db  ./data/pr.parquet

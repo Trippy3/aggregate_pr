@@ -2,7 +2,7 @@
 
 display_name: "pr_dashboard"
 model: "pr_model"
-timeseries: "created_at"
+timeseries: "merged_at"
 measures:
   - label: PR count
     expression: count(*)

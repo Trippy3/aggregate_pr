@@ -44,7 +44,6 @@ class Database:
             original = self.to_ldf()
             return new.join(original, on="number", how="anti")
 
-        ddb.sql("SELECT * FROM ldf")  # TODO: Investigate why it is necessary
         if self.mode == DBMode.OVERWRITE:
             self.conn.sql(f"CREATE TABLE {self.top_table} AS SELECT * FROM ldf")
         elif self.mode == DBMode.DELTA:

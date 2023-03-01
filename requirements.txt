@@ -1,6 +1,6 @@
 # Dependencies
 requests
-duckdb==0.7.0
+duckdb==0.7.1
 polars==0.16.7
 pyarrow==11.0.0
 numpy==1.24.2

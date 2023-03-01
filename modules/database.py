@@ -48,8 +48,8 @@ class Database:
         if self.mode == DBMode.OVERWRITE:
             self.conn.sql(f"CREATE TABLE {self.top_table} AS SELECT * FROM ldf")
         elif self.mode == DBMode.DELTA:
-            only_add = get_only_additional(ldf)
-            self.conn.append(self.top_table, only_add.collect().to_pandas())
+            only_add = get_only_additional(ldf)  # noqa
+            self.conn.sql(f"INSERT INTO {self.top_table} SELECT * FROM only_add")
         return self.conn
 
     def to_ldf(self) -> pl.LazyFrame:

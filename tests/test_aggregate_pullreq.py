@@ -12,3 +12,10 @@ class Test_main:
         )
         with pytest.raises(SystemExit):
             ap.main()
+
+    def test_Exit_IfTokenDoesNotExist(self, mocker):
+        mocker.patch.object(
+            sys, "argv", ["aggregate_pillreq.py", "https://github.com/Trippy3/aggregate_pr", "-t", "./no_exist/.no_key"]
+        )
+        with pytest.raises(SystemExit):
+            ap.main()

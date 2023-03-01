@@ -36,6 +36,9 @@ def main():
     if args.out_dir.is_file():
         print(f"Specify a dir path, not a file path. your-input: {args.out_dir}", file=sys.stderr)
         sys.exit(1)
+    if not args.token_file.exists():
+        print(f"Token file does not exist. your-input: {args.token_file}", file=sys.stderr)
+        sys.exit(1)
     args.out_dir.mkdir(parents=True, exist_ok=True)
     repo = Repository(args.addr, args.token_file)
     db = Database(args.out_dir / "pr.db", DBMode.OVERWRITE if args.init else DBMode.DELTA)

@@ -40,13 +40,17 @@ class Test_write_data:
             db = Database(Path(dir) / "test_write.db", DBMode.OVERWRITE)
             ldf = pl.DataFrame({"number": [1, 7, 9], "labels": ["bug", None, "one,two"]}).lazy()
             ret = db.write_data(ldf)
-            assert ret.sql(f"SELECT * FROM {db.top_table}").pl().glimpse(True) == ldf.collect().glimpse(True)
+            assert ret.sql(f"SELECT * FROM {db.top_table}").pl().glimpse(return_as_string=True) == ldf.collect().glimpse(
+                return_as_string=True
+            )
             db.conn.close()
             db = Database(Path(dir) / "test_write.db", DBMode.DELTA)  # Case by existing db file
             add_ldf = pl.DataFrame({"number": [2, 9], "labels": ["four", None]}).lazy()
             ret = db.write_data(add_ldf)
             expected = pl.concat([ldf, add_ldf.join(ldf, on="number", how="anti")], parallel=False)
-            assert ret.sql(f"SELECT * FROM {db.top_table}").pl().glimpse(True) == expected.collect().glimpse(True)
+            assert ret.sql(f"SELECT * FROM {db.top_table}").pl().glimpse(
+                return_as_string=True
+            ) == expected.collect().glimpse(return_as_string=True)
 
 
 class Test_to_parquet:
